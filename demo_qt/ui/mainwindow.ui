@@ -28,6 +28,7 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_File"/>
+    <addaction name="actionClose_File"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -38,6 +39,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionClose_File">
+   <property name="text">
+    <string>Close File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>
