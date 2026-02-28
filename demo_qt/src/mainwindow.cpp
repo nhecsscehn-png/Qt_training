@@ -2,6 +2,8 @@
 #include "headers/mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFrame>
+#include <QVBoxLayout>
+#include <QPlainTextEdit>
 //#include <QPushButton>
 //#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
 //#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
@@ -40,11 +42,12 @@ void MainWindow::on_actionQuit_triggered(){
 void MainWindow::on_actionNew_File_triggered()
 {
     // Créer un nouvel onglet nommé "Untitled"
-    QFrame *tabFrame = new QFrame(this);
-    tabsWidget->addTab(tabFrame, "Untitled");
+    // QFrame *tabFrame = new QFrame(this);
+    // tabsWidget->addTab(tabFrame, "Untitled");
     // Se renseigner dessus
     // QLabel *label = new QLabel(tabFrame);
     // label->setText("Hello world");
+    MainWindow::createTab(); // Parceque l'on a crée une fonction dédiée dans mainwindow.h
 }
 
 
@@ -60,3 +63,15 @@ void MainWindow::closeTab(int index)
     tabsWidget->removeTab(index); // On ne spécifie pas "currentIndex" car l'on pourrait fermer l'onglet actif en cliquant sur la croix d'un onglet qui ne l'est pas
 }
 
+void MainWindow::createTab()
+{
+    QFrame *tabFrame = new QFrame(this);
+    QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame);
+
+    QPlainTextEdit *fileEdit = new QPlainTextEdit();
+
+    tabLayout->addWidget(fileEdit);
+
+    int tab = tabsWidget->addTab(tabFrame, "Untitled");
+    tabsWidget->setCurrentIndex(tab);
+}
