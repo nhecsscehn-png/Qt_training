@@ -2,6 +2,9 @@
 #include "headers/mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFrame>
+#include <QVBoxLayout>
+#include <QPlainTextEdit>
+#include <QFileDialog>
 //#include <QPushButton>
 //#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
 //#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
@@ -24,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Il existe un signal qui permet de détecté le clique sur la croix de fermeture
     connect(tabsWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+
+    QFontDatabase::addApplicationFont(":/fonts/StardosStencil-Regular.ttf"); // Pour que la police d'écriture soit prise en compte au niveau de l'application, il faut déclarer son ajout dans le constructeur MainWindow
 }
 
 MainWindow::~MainWindow()
@@ -40,11 +45,12 @@ void MainWindow::on_actionQuit_triggered(){
 void MainWindow::on_actionNew_File_triggered()
 {
     // Créer un nouvel onglet nommé "Untitled"
-    QFrame *tabFrame = new QFrame(this);
-    tabsWidget->addTab(tabFrame, "Untitled");
+    // QFrame *tabFrame = new QFrame(this);
+    // tabsWidget->addTab(tabFrame, "Untitled");
     // Se renseigner dessus
     // QLabel *label = new QLabel(tabFrame);
     // label->setText("Hello world");
+    MainWindow::createTab();
 }
 
 
@@ -58,5 +64,33 @@ void MainWindow::on_actionClose_File_triggered()
 void MainWindow::closeTab(int index)
 {
     tabsWidget->removeTab(index); // On ne spécifie pas "currentIndex" car l'on pourrait fermer l'onglet actif en cliquant sur la croix d'un onglet qui ne l'est pas
+}
+
+void MainWindow::createTab()
+{
+    QFrame *tabFrame = new QFrame(this);
+    QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame);
+
+    QPlainTextEdit *fileEdit = new QPlainTextEdit();
+
+    // L'on fait en sorte que la police d'écriture apparaisse dans la fenêtre
+    QFont font =fileEdit->document()->defaultFont();
+    font.setFamily("Stardos Stencil"); // L'on crée la font (police d'écriture)
+    fileEdit->setFont(font); // L'on déclare que l'on veut utiliser la font que l'on a crée
+
+    fileEdit->setTabStopDistance(QFontMetrics(fileEdit->font()).horizontalAdvance(' ') * 4); // Pour régler la distance de la tabulation. L'on dit 1 espace * 4
+
+    tabLayout->addWidget(fileEdit); // L'on ajoute fileEdit juste au dessus à l'intérieur du layout au dessus de lui
+
+    int tab = tabsWidget->addTab(tabFrame, "Untitled");
+    tabsWidget->setCurrentIndex(tab);
+}
+
+void MainWindow::on_actionOpen_File_triggered()
+{
+    QString filePath = QFileDialog
+
+    MainWindow::createTab(); // Créer un onglet
+    MainWindow::openTabFile(filePath);
 }
 
