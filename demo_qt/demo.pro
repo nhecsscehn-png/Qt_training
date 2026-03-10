@@ -24,4 +24,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    ressources/ressources.qrc
+    # ressources/ressources.qrc # Finalement on enlève le dossier pour ne pas s'encombrer
+    ressources.qrc

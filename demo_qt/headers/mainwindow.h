@@ -28,6 +28,10 @@ private slots:
 
     void closeTab(int index); // Méthode que l'on déclare pour pouvoir fermer un onglet avec la croix de fermeture
 
+    void createTab();
+
+    void on_actionOpen_File_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTabWidget *tabsWidget = new QTabWidget(this); // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
