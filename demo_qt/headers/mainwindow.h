@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTabWidget> // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
+#include <QPlainTextEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +32,10 @@ private slots:
     void createTab();
 
     void on_actionOpen_File_triggered();
+
+    void openTabFile(QString filePath);
+
+    QPlainTextEdit* currentTextEdit();
 
 private:
     Ui::MainWindow *ui;
