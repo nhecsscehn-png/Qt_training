@@ -4,6 +4,10 @@
 #include <QFrame>
 #include <QVBoxLayout>
 #include <QPlainTextEdit>
+#include <QFileDialog>
+#include <QMessageBox> // Affiche des messages dans des fenêtres
+#include <QTextStream>
+#include <QList>
 //#include <QPushButton>
 //#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
 //#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
@@ -69,9 +73,51 @@ void MainWindow::createTab()
     QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame);
 
     QPlainTextEdit *fileEdit = new QPlainTextEdit();
+    fileEdit->setObjectName("textEdit"); // On nomme l'objet
 
     tabLayout->addWidget(fileEdit);
 
     int tab = tabsWidget->addTab(tabFrame, "Untitled");
     tabsWidget->setCurrentIndex(tab);
 }
+
+void MainWindow::openTabFile(QString filePath)
+{
+    QFile file(filePath); // Récupère le fichier à l'aide de QFile à l'aide du chemin filePath
+    QFileInfo fileName(filePath);
+    if (!file.open(QIODevice::ReadOnly | QFile::Text)){
+        QMessageBox::warning(this, "Warning", "Cannot open file : " + file.errorString()); // Type:warning; Quelle fenêtre ?:celle-ci; Message:"Warining", "Cannot open file : "; et à la fin on concatène grâce à + file.errorString()
+        return; // Afin d'ignorer les autres lignes de code qui vont suivre ce if et sortir de cette fonction
+    }
+                          // (Retourne l'index courant, chemin complet du fichier)
+    tabsWidget->setTabToolTip(tabsWidget->currentIndex(), filePath); // Le tooltip est le petit texte qui s'affiche lorsque l'on survole un élément
+
+    QTextStream in(&file); // Récupérer le texte dans un fichier; Il faut passer à QTextStream une adresse (pointeur ou &variable)
+    QString text = in.readAll(); // Récupérer toutes les lignes contenues dans le fichier
+
+    MainWindow::currentTextEdit()->setPlainText(text); // L'on a spécifié "text" qui se trouve juste au-dessus
+
+    file.close();
+
+    tabsWidget->setTabText(tabsWidget->currentIndex(), fileName.fileName());
+}
+
+QPlainTextEdit* MainWindow::currentTextEdit()
+{                                                                                    // Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
+    QList<QPlainTextEdit *> fileEditList = tabsWidget->findChildren<QPlainTextEdit *>("textEdit"); // On spécifie l'objet nommé "textEdit"
+    // return fileEditList[tabsWidget->currentIndex()]; // Retourner celui qui est à l'index
+    for(int i = 0; i < fileEditList.count(); i++){
+        if(tabsWidget->indexOf(fileEditList[i]->parentWidget()) == tabsWidget->currentIndex()){
+            return fileEditList[i];
+        }
+    }
+    return new QPlainTextEdit;
+}
+
+void MainWindow::on_actionOpen_File_triggered()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "Open the file"); // Pour récupérer le chemin d'un fichier qu'on va sélectionner dans une fenêtre. On a appelé la variable "filePath"
+    MainWindow::createTab(); // Crée un nouvel onglet vide qui accueillera le contenu du fichier. "createTab();" serait suffisant depuis l'intérieur de la classe
+    MainWindow::openTabFile(filePath); // Charge le contenu du fichier sélectionné dans l'onglet nouvellement créé
+}
+
