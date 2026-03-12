@@ -9,7 +9,7 @@
 #include <QTextStream>
 #include <QList>
 //#include <QPushButton>
-//#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
+#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
 //#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
 
 MainWindow::MainWindow(QWidget *parent)
@@ -74,6 +74,11 @@ void MainWindow::createTab()
 
     QPlainTextEdit *fileEdit = new QPlainTextEdit();
     fileEdit->setObjectName("textEdit"); // On nomme l'objet
+
+    // Pour ajouter la barre de statut
+    QLabel *status = new QLabel(this);
+    status->setText("Line 1, Column 1");
+    status->setObjectName
 
     tabLayout->addWidget(fileEdit);
 
