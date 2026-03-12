@@ -8,8 +8,9 @@
 #include <QMessageBox> // Affiche des messages dans des fenêtres
 #include <QTextStream>
 #include <QList>
+#include <QFontDatabase>
 //#include <QPushButton>
-#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous
+#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous et pour la barre de statut
 //#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Il existe un signal qui permet de détecté le clique sur la croix de fermeture
     connect(tabsWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+
+    QFontDatabase::addApplicationFont("fonts/StardosStencil-Regular.ttf"); // L'on doit mettre le chemin pour aller au fichier
 }
 
 MainWindow::~MainWindow()
@@ -73,14 +76,25 @@ void MainWindow::createTab()
     QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame);
 
     QPlainTextEdit *fileEdit = new QPlainTextEdit();
+
     fileEdit->setObjectName("textEdit"); // On nomme l'objet
+
+    //QFont font = fileEdit->document()->defaultFont();
+    QFont font;
+    font.setFamily("Stardos Stencil"); // L'on doit être placer le nom exacte de la police ici
+    fileEdit->setFont(font);
+
+    fileEdit->setTabStopDistance(QFontMetrics(fileEdit->font()).horizontalAdvance(' ') * 4);
+
+    tabLayout->addWidget(fileEdit);
 
     // Pour ajouter la barre de statut
     QLabel *status = new QLabel(this);
-    status->setText("Line 1, Column 1");
-    status->setObjectName
+    status->setText("Line 1, Column 1"); // Ajout d'un texte par défaut
+    status->setObjectName("status");
 
     tabLayout->addWidget(fileEdit);
+    tabLayout->addWidget(status);
 
     int tab = tabsWidget->addTab(tabFrame, "Untitled");
     tabsWidget->setCurrentIndex(tab);
@@ -88,6 +102,7 @@ void MainWindow::createTab()
     tabsWidget->setTabToolTip(tabsWidget->currentIndex(), "Untitled");
 
     connect(MainWindow::currentTextEdit(), SIGNAL(textChanged()), this, SLOT(textEditChanged())); // Pour écouter un signal
+    connect(MainWindow::currentTextEdit(), SIGNAL(cursorPositionChanged()), this, SLOT(updateStatus())); // Signal pour la barre d'attribut change l'indication de ligne et de colonne au fur ét à mesure du déplacement du curseur
 }
 
 void MainWindow::openTabFile(QString filePath)
@@ -121,6 +136,18 @@ QPlainTextEdit* MainWindow::currentTextEdit()
         }
     }
     return new QPlainTextEdit;
+}
+
+QLabel* MainWindow::currentStatus()
+{                                                                                    // Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
+    QList<QLabel *>statusList = tabsWidget->findChildren<QLabel *>("status"); // On spécifie l'objet nommé "textEdit"
+    // return fileEditList[tabsWidget->currentIndex()]; // Retourner celui qui est à l'index
+    for(int i = 0; i < statusList.count(); i++){
+        if(tabsWidget->indexOf(statusList[i]->parentWidget()) == tabsWidget->currentIndex()){
+            return statusList[i];
+        }
+    }
+    return new QLabel;
 }
 
 void MainWindow::on_actionOpen_File_triggered()
@@ -191,3 +218,13 @@ void MainWindow::on_actionSave_As_triggered()
     MainWindow::openTabFile(filePath);
 }
 
+void MainWindow::updateStatus()
+{
+    // On le place dans un QString car QLabel n'aime pas les entiers
+    QString line = QString::number(MainWindow::currentTextEdit()->textCursor().blockNumber()+1); // blockNumber() pour récupérer la ligne
+    QString column = QString::number(MainWindow::currentTextEdit()->textCursor().columnNumber()+1); // columnNumber() pour récupérer la colonne
+
+    QString newStatus = "Line " + line + ", Column " + column;
+
+    MainWindow::currentStatus()->setText(newStatus);
+}
