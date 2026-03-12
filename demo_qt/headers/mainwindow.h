@@ -37,6 +37,12 @@ private slots:
 
     QPlainTextEdit* currentTextEdit();
 
+    void textEditChanged();
+
+    void on_actionSave_triggered();
+
+    void on_actionSave_As_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTabWidget *tabsWidget = new QTabWidget(this); // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu

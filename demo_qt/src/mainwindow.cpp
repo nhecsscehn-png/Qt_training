@@ -79,6 +79,10 @@ void MainWindow::createTab()
 
     int tab = tabsWidget->addTab(tabFrame, "Untitled");
     tabsWidget->setCurrentIndex(tab);
+
+    tabsWidget->setTabToolTip(tabsWidget->currentIndex(), "Untitled");
+
+    connect(MainWindow::currentTextEdit(), SIGNAL(textChanged()), this, SLOT(textEditChanged())); // Pour écouter un signal
 }
 
 void MainWindow::openTabFile(QString filePath)
@@ -92,7 +96,7 @@ void MainWindow::openTabFile(QString filePath)
                           // (Retourne l'index courant, chemin complet du fichier)
     tabsWidget->setTabToolTip(tabsWidget->currentIndex(), filePath); // Le tooltip est le petit texte qui s'affiche lorsque l'on survole un élément
 
-    QTextStream in(&file); // Récupérer le texte dans un fichier; Il faut passer à QTextStream une adresse (pointeur ou &variable)
+    QTextStream in(&file); // Récupérer le texte dans un fichier; Il faut passer à QTextStream une adresse (pointeur ou &variable). "in" pour lire et "out" pour écrire
     QString text = in.readAll(); // Récupérer toutes les lignes contenues dans le fichier
 
     MainWindow::currentTextEdit()->setPlainText(text); // L'on a spécifié "text" qui se trouve juste au-dessus
@@ -119,5 +123,66 @@ void MainWindow::on_actionOpen_File_triggered()
     QString filePath = QFileDialog::getOpenFileName(this, "Open the file"); // Pour récupérer le chemin d'un fichier qu'on va sélectionner dans une fenêtre. On a appelé la variable "filePath"
     MainWindow::createTab(); // Crée un nouvel onglet vide qui accueillera le contenu du fichier. "createTab();" serait suffisant depuis l'intérieur de la classe
     MainWindow::openTabFile(filePath); // Charge le contenu du fichier sélectionné dans l'onglet nouvellement créé
+}
+
+// Méthode qui sera appelé quand le contenu du texte sera changé
+void MainWindow::textEditChanged()
+{
+    QString tabName = tabsWidget->tabText(tabsWidget->currentIndex()); // L'on doit d'abord récupérer le titre de l'onglet
+    if (tabName.at(0) != "*"){  // "at" pour récupérer l'index spécifique d'une chaîne de caractère
+        tabsWidget->setTabText(tabsWidget->currentIndex(),"*"+tabName); // le tabName est le titre de l'onglet
+    }
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString fileName = tabsWidget->tabToolTip(tabsWidget->currentIndex());
+    if (fileName == "Untitled"){
+        MainWindow::on_actionSave_As_triggered();
+        return;
+    }
+
+    QFile file(fileName);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text)){
+        QMessageBox::warning(this, "Warning", "Cannot save file : " + file.errorString());
+        return;
+    }
+
+    QTextStream out(&file); // Avec "in" c'est pour lire. Cette fois-ci, avec out, c'est pour écrire
+    QString text = MainWindow::currentTextEdit()->toPlainText(); // "toPlainText" pour récupérer le contenu texte du widget
+
+    out << text;
+
+    file.close();
+
+    QString newTabText = tabsWidget->tabText(tabsWidget->currentIndex()).remove(0, 1);
+    tabsWidget->setTabText(tabsWidget->currentIndex(), newTabText);
+}
+
+
+void MainWindow::on_actionSave_As_triggered()
+{
+    if(tabsWidget->count() == 0){ // Si 0 onglet est ouvert
+        QMessageBox::warning(this, "Warning", "Cannot save file !");
+        return;
+    }
+
+    QString filePath = QFileDialog::getSaveFileName(this, "Save As ...");
+    QFile file(filePath);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text)){
+        QMessageBox::warning(this, "Warning", "Cannot save file : " + file.errorString());
+        return;
+    }
+
+    QTextStream out(&file);
+    QString text = MainWindow::currentTextEdit()->toPlainText();
+
+    out << text;
+
+    file.close();
+
+    MainWindow::openTabFile(filePath);
 }
 
