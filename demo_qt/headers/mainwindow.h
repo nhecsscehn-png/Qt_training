@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTabWidget> // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
 #include <QPlainTextEdit>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,13 +40,20 @@ private slots:
 
     QPlainTextEdit* currentTextEdit();
 
+    QLabel* currentStatus();
+
     void textEditChanged();
 
     void on_actionSave_triggered();
 
     void on_actionSave_As_triggered();
 
+<<<<<<< HEAD
 >>>>>>> 7d2cf6931bdd4766ab7ff0bd483eb4854c354b1a
+=======
+    void updateStatus();
+
+>>>>>>> 48cb73c62634d27ed84af89d1af4360f6c3d9c9c
 private:
     Ui::MainWindow *ui;
     QTabWidget *tabsWidget = new QTabWidget(this); // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
