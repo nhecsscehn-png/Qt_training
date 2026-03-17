@@ -9,9 +9,9 @@
 #include <QTextStream>
 #include <QList>
 #include <QFontDatabase>
-//#include <QPushButton>
-#include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous et pour la barre de statut
-//#include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
+// #include <QPushButton>
+// #include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous et pour la barre de statut
+// #include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,11 +26,22 @@ MainWindow::MainWindow(QWidget *parent)
     // tabsWidget->addTab(new QWidget, "Tab3");
     tabsWidget->setMovable(true); // Pour permettre aux onglets de pouvoir bouger quand on les saisi avec la souris
     tabsWidget->setTabsClosable(true); // Pour ajouter une croix de fermeture
-    setCentralWidget(tabsWidget); // Pour que le widget occupe l'espace, méthode de MainWindow
+    // setCentralWidget(tabsWidget); // Pour que le widget occupe l'espace, méthode de MainWindow
+    setCentralWidget(window); // window est le QSplitter
+
+    setCentralWidget(window);
+
+    treeView->setMaximumWidth(0);
+    treeView->setMaximumWidth(0);
+
+    window->addWidget(treeView); // Dans le QSplitter, l'on doit ajouter les widgets que l'on veut splitter
+    window->addWidget(tabsWidget);
+
     // tabsWidget->show(); // setCentralWidget la remplace
 
     // Il existe un signal qui permet de détecté le clique sur la croix de fermeture
     connect(tabsWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+    connect(treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(openTreeViewFile(QModelIndex)));
 
     QFontDatabase::addApplicationFont("fonts/StardosStencil-Regular.ttf"); // L'on doit mettre le chemin pour aller au fichier
 }
@@ -228,3 +239,35 @@ void MainWindow::updateStatus()
 
     MainWindow::currentStatus()->setText(newStatus);
 }
+
+void MainWindow::on_actionOpen_Folder_triggered()
+{
+    // Ouvre une boîte de dialogue pour sélectionner un dossier
+    // Paramètres : (parent, titre, dossier de départ, options)
+    // Retourne : QUrl avec le chemin du dossier sélectionné (conversion implicite depuis QString)
+    //            ou URL vide si annulé
+    QUrl dirPath = QFileDialog::getExistingDirectory(
+        this,                           // Fenêtre parente (pour la modalité et le centrage)
+        "Open Folder",                  // Titre de la boîte de dialogue
+        "/",                            // Dossier de départ pour la navigation (racine)
+        QFileDialog::ShowDirsOnly       // Option : n'afficher que les dossiers (pas les fichiers)
+    );
+    dirModel->setRootPath(dirPath.toString());
+    treeView->setModel(dirModel);
+    treeView->setRootIndex(dirModel->index(dirPath.toString()));
+    // Pour quelques colonnes que treeView affiche par défaut. "hideColumn" pour cacher les colonnes qu'on ne veut pas voir apparaître
+    treeView->hideColumn(1);
+    treeView->hideColumn(2);
+    treeView->hideColumn(3);
+
+    treeView->setMinimumWidth(width() * 20 / 100); // 20%
+    treeView->setMaximumWidth(width() * 30 / 100); // 30%
+}
+
+void MainWindow::openTreeViewFile(QModelIndex index)
+{
+    MainWindow::createTab(); // Créer un onglet
+    QString filePath = dirModel->fileInfo(index).absoluteFilePath(); // absolutFilePath : méthode de QFileInfo pour avoir le chemin absolu du fichier
+    MainWindow::openTabFile(filePath);
+}
+

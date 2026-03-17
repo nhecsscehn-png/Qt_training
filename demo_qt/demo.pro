@@ -25,4 +25,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     # ressources/ressources.qrc # Finalement on enlève le dossier pour ne pas s'encombrer
-    ressources.qrc
+    # ressources.qrc
