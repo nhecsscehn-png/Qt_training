@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(window);
 
     treeView->setMaximumWidth(0);
-    treeView->setMaximumWidth(0);
+    treeView->setMidLineWidth(0);
 
     window->addWidget(treeView); // Dans le QSplitter, l'on doit ajouter les widgets que l'on veut splitter
     window->addWidget(tabsWidget);
