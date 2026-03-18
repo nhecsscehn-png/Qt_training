@@ -13,7 +13,7 @@
 // #include<QLabel> // Nécessaire pour le fonctionnement du label plus en-dessous et pour la barre de statut
 // #include <QTabWidget> // On peut l'enlever puisque déclaré dans mainwindow.h
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent) // Constructeur
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -27,15 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
     tabsWidget->setMovable(true); // Pour permettre aux onglets de pouvoir bouger quand on les saisi avec la souris
     tabsWidget->setTabsClosable(true); // Pour ajouter une croix de fermeture
     // setCentralWidget(tabsWidget); // Pour que le widget occupe l'espace, méthode de MainWindow
-    setCentralWidget(window); // window est le QSplitter
+    setCentralWidget(window); // Le splitter est au centre. window est le QSplitter.
 
-    setCentralWidget(window);
+    treeView->setMaximumWidth(0); // Caché au démarrage
+    treeView->setMidLineWidth(0); // Style de bordure
 
-    treeView->setMaximumWidth(0);
-    treeView->setMidLineWidth(0);
-
-    window->addWidget(treeView); // Dans le QSplitter, l'on doit ajouter les widgets que l'on veut splitter
-    window->addWidget(tabsWidget);
+    window->addWidget(treeView); // Partie gauche (explorateur). Dans le QSplitter, l'on doit ajouter les widgets que l'on veut splitter
+    window->addWidget(tabsWidget); // Partie droite (édition)
 
     // tabsWidget->show(); // setCentralWidget la remplace
 
