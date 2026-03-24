@@ -28,8 +28,9 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_File"/>
-    <addaction name="actionClose_File"/>
     <addaction name="actionOpen_File"/>
+    <addaction name="actionOpen_Folder"/>
+    <addaction name="actionClose_File"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
    </widget>
@@ -74,6 +75,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionOpen_Folder">
+   <property name="text">
+    <string>Open Folder</string>
    </property>
   </action>
  </widget>

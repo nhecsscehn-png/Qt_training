@@ -1,1 +1,10 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/">
+        <file>static/Orbitron-Black.ttf</file>
+        <file>static/Orbitron-Bold.ttf</file>
+        <file>static/Orbitron-ExtraBold.ttf</file>
+        <file>static/Orbitron-Medium.ttf</file>
+        <file>static/Orbitron-Regular.ttf</file>
+        <file>static/Orbitron-SemiBold.ttf</file>
+    </qresource>
+</RCC>

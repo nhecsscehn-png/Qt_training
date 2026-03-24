@@ -5,6 +5,9 @@
 #include <QTabWidget> // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
 #include <QPlainTextEdit>
 #include <QLabel>
+#include <QTreeView>
+#include <QSplitter>
+#include <QFileSystemModel> // Permet de gérer les fichiers du système; complète QTreeView
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -48,8 +51,19 @@ private slots:
 
     void updateStatus();
 
+    void on_actionOpen_Folder_triggered();
+
+    void openTreeViewFile(QModelIndex index);
+
 private:
     Ui::MainWindow *ui;
+
     QTabWidget *tabsWidget = new QTabWidget(this); // Afin que ce que l'on écrit dans la méthode de triggered soit reconnu
+
+    QTreeView *treeView = new QTreeView;
+
+    QSplitter *window = new QSplitter(this); // L'on passe "this" dans le constructeur
+
+    QFileSystemModel *dirModel = new QFileSystemModel(this); // On appelle l'instance "dirModel"
 };
 #endif // MAINWINDOW_H
