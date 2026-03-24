@@ -41,7 +41,8 @@ MainWindow::MainWindow(QWidget *parent) // Constructeur
     connect(tabsWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(openTreeViewFile(QModelIndex)));
 
-    QFontDatabase::addApplicationFont("fonts/StardosStencil-Regular.ttf"); // L'on doit mettre le chemin pour aller au fichier
+    // Ajouter une police d'écriture
+    QFontDatabase::addApplicationFont(":/static/Orbitron-Regular.ttf"); // L'on doit mettre le chemin pour aller au fichier
 }
 
 MainWindow::~MainWindow()
@@ -73,83 +74,98 @@ void MainWindow::on_actionClose_File_triggered()
     tabsWidget->removeTab(tabsWidget->currentIndex());
 }
 
-// Méthode que l'on définit et qui est déclaré dans mainwindow.h
+// Fermeture d'onglet. Méthode que l'on définit et qui est déclaré dans mainwindow.h
 void MainWindow::closeTab(int index)
 {
+    // Supprime l'onglet à l'index donné
     tabsWidget->removeTab(index); // On ne spécifie pas "currentIndex" car l'on pourrait fermer l'onglet actif en cliquant sur la croix d'un onglet qui ne l'est pas
 }
 
+// Création d'un nouvel onglet
 void MainWindow::createTab()
 {
+    // Créer un conteneur (QFrame) pour l'onglet
     QFrame *tabFrame = new QFrame(this);
-    QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame);
+    QVBoxLayout *tabLayout = new QVBoxLayout(tabFrame); // On le met dans la frame "tabFrame" donc l'on entre "tabFrame"
 
+    // Créer l'éditeur de texte
     QPlainTextEdit *fileEdit = new QPlainTextEdit();
+    fileEdit->setObjectName("textEdit"); // On nomme l'objet pour le retrouver plus tard
 
-    fileEdit->setObjectName("textEdit"); // On nomme l'objet
+    // Appliquer la police personnalisée
+    QFont font = fileEdit->document()->defaultFont();
+    font.setFamily("Orbitron"); // L'on doit être placer le nom exacte de la police ici
+    fileEdit->setFont(font); // Pour indiquer que l'on veut utiliser la variable "font"
 
-    //QFont font = fileEdit->document()->defaultFont();
-    QFont font;
-    font.setFamily("Stardos Stencil"); // L'on doit être placer le nom exacte de la police ici
-    fileEdit->setFont(font);
-
+    // Configurer les tabulations
     fileEdit->setTabStopDistance(QFontMetrics(fileEdit->font()).horizontalAdvance(' ') * 4);
 
-    tabLayout->addWidget(fileEdit);
+    // L'on ajoute fileEdit dans tabLayout
+    tabLayout->addWidget(fileEdit); // Dans la frame, l'on aura un layout et dans le layout, l'on aura le widget fileEdit
 
     // Pour ajouter la barre de statut
-    QLabel *status = new QLabel(this);
+    QLabel *status = new QLabel(this); // Peut s'écrire comme suit : QLabel *status = new QLabel("Line 1, Column 1");
     status->setText("Line 1, Column 1"); // Ajout d'un texte par défaut
     status->setObjectName("status");
 
+    // Assemble le tout
     tabLayout->addWidget(fileEdit);
     tabLayout->addWidget(status);
-
     int tab = tabsWidget->addTab(tabFrame, "Untitled");
-    tabsWidget->setCurrentIndex(tab);
+    tabsWidget->setCurrentIndex(tab); // Active le nouvel onglet
 
     tabsWidget->setTabToolTip(tabsWidget->currentIndex(), "Untitled");
 
-    connect(MainWindow::currentTextEdit(), SIGNAL(textChanged()), this, SLOT(textEditChanged())); // Pour écouter un signal
-    connect(MainWindow::currentTextEdit(), SIGNAL(cursorPositionChanged()), this, SLOT(updateStatus())); // Signal pour la barre d'attribut change l'indication de ligne et de colonne au fur ét à mesure du déplacement du curseur
+    // Connecte les signaux
+    connect(MainWindow::currentTextEdit(), SIGNAL(textChanged()), this, SLOT(textEditChanged())); // Texte modifié → ajoute "*"
+    connect(MainWindow::currentTextEdit(), SIGNAL(cursorPositionChanged()), this, SLOT(updateStatus())); // Signal pour la barre d'attribut change l'indication de ligne et de colonne au fur ét à mesure du déplacement du curseur. Curseur bouge → met à jour ligne/colonne
 }
 
+
+// Lecture d'un fichier
 void MainWindow::openTabFile(QString filePath)
 {
     QFile file(filePath); // Récupère le fichier à l'aide de QFile à l'aide du chemin filePath
     QFileInfo fileName(filePath);
     if (!file.open(QIODevice::ReadOnly | QFile::Text)){
-        QMessageBox::warning(this, "Warning", "Cannot open file : " + file.errorString()); // Type:warning; Quelle fenêtre ?:celle-ci; Message:"Warining", "Cannot open file : "; et à la fin on concatène grâce à + file.errorString()
+        QMessageBox::warning(this, "Warning", "Cannot open file : " + file.errorString()); // Erreur Type:warning; (Quelle fenêtre ?:celle-ci; Message:"Warining", "Cannot open file : "; et à la fin on concatène grâce à + file.errorString())
         return; // Afin d'ignorer les autres lignes de code qui vont suivre ce if et sortir de cette fonction
     }
                           // (Retourne l'index courant, chemin complet du fichier)
-    tabsWidget->setTabToolTip(tabsWidget->currentIndex(), filePath); // Le tooltip est le petit texte qui s'affiche lorsque l'on survole un élément
+    tabsWidget->setTabToolTip(tabsWidget->currentIndex(), filePath); // Met à jour le tooltip; c'est le petit texte qui s'affiche lorsque l'on survole un élément
 
+    // Lit tout le contenu
     QTextStream in(&file); // Récupérer le texte dans un fichier; Il faut passer à QTextStream une adresse (pointeur ou &variable). "in" pour lire et "out" pour écrire
     QString text = in.readAll(); // Récupérer toutes les lignes contenues dans le fichier
 
+    // Affiche dans l'éditeur
     MainWindow::currentTextEdit()->setPlainText(text); // L'on a spécifié "text" qui se trouve juste au-dessus
 
     file.close();
 
-    tabsWidget->setTabText(tabsWidget->currentIndex(), fileName.fileName());
+    tabsWidget->setTabText(tabsWidget->currentIndex(), fileName.fileName()); // Met à jour le titre
 }
 
+// Pour savoir quel éditeur est actif pour y lire/écrire. "currentTextEdit()" est une méthode utilitaire
 QPlainTextEdit* MainWindow::currentTextEdit()
-{                                                                                    // Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
+{
+    // Trouve tous les QPlainTextEdit nommés "textEdit"
+                                                                                    // Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
     QList<QPlainTextEdit *> fileEditList = tabsWidget->findChildren<QPlainTextEdit *>("textEdit"); // On spécifie l'objet nommé "textEdit"
+
     // return fileEditList[tabsWidget->currentIndex()]; // Retourner celui qui est à l'index
     for(int i = 0; i < fileEditList.count(); i++){
         if(tabsWidget->indexOf(fileEditList[i]->parentWidget()) == tabsWidget->currentIndex()){
             return fileEditList[i];
         }
     }
-    return new QPlainTextEdit;
+    return new QPlainTextEdit; // Fallback (ne devrait pas arriver)
 }
 
 QLabel* MainWindow::currentStatus()
-{                                                                                    // Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
-    QList<QLabel *>statusList = tabsWidget->findChildren<QLabel *>("status"); // On spécifie l'objet nommé "textEdit"
+{
+    QList<QLabel *>statusList = tabsWidget->findChildren<QLabel *>("status"); // On spécifie l'objet nommé "textEdit" [Dans Qt, l'on peut nommer les objets ce qui permet de les spécifier
+    // Même logique que currentTextEdit() mais pour le QLabel
     // return fileEditList[tabsWidget->currentIndex()]; // Retourner celui qui est à l'index
     for(int i = 0; i < statusList.count(); i++){
         if(tabsWidget->indexOf(statusList[i]->parentWidget()) == tabsWidget->currentIndex()){
@@ -159,27 +175,29 @@ QLabel* MainWindow::currentStatus()
     return new QLabel;
 }
 
+// Ouverture d'un fichier depuis le menu (Fichier → Ouvrir)
 void MainWindow::on_actionOpen_File_triggered()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, "Open the file"); // Pour récupérer le chemin d'un fichier qu'on va sélectionner dans une fenêtre. On a appelé la variable "filePath"
+    QString filePath = QFileDialog::getOpenFileName(this, "Open the file"); // Pour récupérer le chemin d'un fichier qu'on va sélectionner dans une fenêtre. On a nommé la variable "filePath"
     MainWindow::createTab(); // Crée un nouvel onglet vide qui accueillera le contenu du fichier. "createTab();" serait suffisant depuis l'intérieur de la classe
     MainWindow::openTabFile(filePath); // Charge le contenu du fichier sélectionné dans l'onglet nouvellement créé
 }
 
-// Méthode qui sera appelé quand le contenu du texte sera changé
+// Détection de modification. Méthode qui sera appelé quand le contenu du texte sera changé
 void MainWindow::textEditChanged()
 {
     QString tabName = tabsWidget->tabText(tabsWidget->currentIndex()); // L'on doit d'abord récupérer le titre de l'onglet
-    if (tabName.at(0) != "*"){  // "at" pour récupérer l'index spécifique d'une chaîne de caractère
-        tabsWidget->setTabText(tabsWidget->currentIndex(),"*"+tabName); // le tabName est le titre de l'onglet
+    if (tabName.at(0) != "*"){  // Ligne qui signifie "Pas déjà modifié". "at" pour récupérer l'index spécifique d'une chaîne de caractère
+        tabsWidget->setTabText(tabsWidget->currentIndex(),"*"+tabName); // Ajoute "*". le tabName est le titre de l'onglet
     }
 }
 
+// Sauvegarder
 void MainWindow::on_actionSave_triggered()
 {
-    QString fileName = tabsWidget->tabToolTip(tabsWidget->currentIndex());
+    QString fileName = tabsWidget->tabToolTip(tabsWidget->currentIndex()); // Chemin stocké
     if (fileName == "Untitled"){
-        MainWindow::on_actionSave_As_triggered();
+        MainWindow::on_actionSave_As_triggered(); // Premier enregistrement
         return;
     }
 
@@ -197,11 +215,11 @@ void MainWindow::on_actionSave_triggered()
 
     file.close();
 
-    QString newTabText = tabsWidget->tabText(tabsWidget->currentIndex()).remove(0, 1);
+    QString newTabText = tabsWidget->tabText(tabsWidget->currentIndex()).remove(0, 1); // Retire l'astérix "*" du titre
     tabsWidget->setTabText(tabsWidget->currentIndex(), newTabText);
 }
 
-
+// Sauvegarder sous
 void MainWindow::on_actionSave_As_triggered()
 {
     if(tabsWidget->count() == 0){ // Si 0 onglet est ouvert
@@ -209,7 +227,7 @@ void MainWindow::on_actionSave_As_triggered()
         return;
     }
 
-    QString filePath = QFileDialog::getSaveFileName(this, "Save As ...");
+    QString filePath = QFileDialog::getSaveFileName(this, "Save As ..."); // Choisir l'emplacement
     QFile file(filePath);
 
     if (!file.open(QFile::WriteOnly | QFile::Text)){
@@ -224,9 +242,10 @@ void MainWindow::on_actionSave_As_triggered()
 
     file.close();
 
-    MainWindow::openTabFile(filePath);
+    MainWindow::openTabFile(filePath); // Met à jour l'onglet avec le nouveau chemin
 }
 
+// Mise à jour de la barre de statut
 void MainWindow::updateStatus()
 {
     // On le place dans un QString car QLabel n'aime pas les entiers
@@ -238,6 +257,7 @@ void MainWindow::updateStatus()
     MainWindow::currentStatus()->setText(newStatus);
 }
 
+// Ouverture d'un dossier (explorateur)
 void MainWindow::on_actionOpen_Folder_triggered()
 {
     // Ouvre une boîte de dialogue pour sélectionner un dossier
@@ -253,15 +273,18 @@ void MainWindow::on_actionOpen_Folder_triggered()
     dirModel->setRootPath(dirPath.toString());
     treeView->setModel(dirModel);
     treeView->setRootIndex(dirModel->index(dirPath.toString()));
-    // Pour quelques colonnes que treeView affiche par défaut. "hideColumn" pour cacher les colonnes qu'on ne veut pas voir apparaître
+
+    // Pour quelques colonnes que treeView affiche par défaut. "hideColumn" pour cacher les colonnes qu'on ne veut pas voir apparaître (size, type, date)
     treeView->hideColumn(1);
     treeView->hideColumn(2);
     treeView->hideColumn(3);
 
+    // Affiche l'explorateur (20-30% de la largeur)
     treeView->setMinimumWidth(width() * 20 / 100); // 20%
     treeView->setMaximumWidth(width() * 30 / 100); // 30%
 }
 
+// Ouverture d'un fichier depuis l'explorateur (clic sur un fichier)
 void MainWindow::openTreeViewFile(QModelIndex index)
 {
     MainWindow::createTab(); // Créer un onglet

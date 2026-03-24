@@ -1,11 +1,10 @@
-<<<<<<< HEAD
 <RCC>
     <qresource prefix="/">
-        <file>fonts/OFL.txt</file>
-        <file>fonts/StardosStencil-Bold.ttf</file>
-        <file>fonts/StardosStencil-Regular.ttf</file>
+        <file>static/Orbitron-Black.ttf</file>
+        <file>static/Orbitron-Bold.ttf</file>
+        <file>static/Orbitron-ExtraBold.ttf</file>
+        <file>static/Orbitron-Medium.ttf</file>
+        <file>static/Orbitron-Regular.ttf</file>
+        <file>static/Orbitron-SemiBold.ttf</file>
     </qresource>
 </RCC>
-=======
-<RCC/>
->>>>>>> 7d2cf6931bdd4766ab7ff0bd483eb4854c354b1a
